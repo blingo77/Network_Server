@@ -91,7 +91,7 @@ int bindSocket(int port, SOCKET serverSocket) {
 	// attempts to bind 'serverSocket' to the specified address and port in the 'service' structure
 	if (bind(serverSocket, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR) {
 
-		cout << "bindSocket() failed: " << WSAGetLastError << endl;
+		cout << "bindSocket() failed: " << WSAGetLastError() << endl;
 		closesocket(serverSocket);
 		WSACleanup();
 		return 0;
@@ -101,4 +101,99 @@ int bindSocket(int port, SOCKET serverSocket) {
 	}
 
 	return 0;
+}
+
+// makes a socket in a state in which it is listening for a incoming connection
+int listen(SOCKET serverSocket) {
+
+	/*
+		listen function:
+
+		int listen(SOCKET serverSocket, int backlog)
+
+		serverSocket: an unconnected Socket
+		backlog: the maximum number of connections allowed
+	*/
+
+	if (listen(serverSocket, 1) == SOCKET_ERROR) {
+		cout << "listen(): Error listening on socket: " << WSAGetLastError() << endl;
+		return 0;
+	}
+	else {
+		cout << "listen () is OK, Waiting for connections..." << endl;
+	}
+
+	return 0;
+}
+
+// pauses the server until the user connects with the server
+SOCKET acceptSocket(SOCKET serverSocket) {
+
+	/*
+		accept() function:
+
+		- this is a blocking function
+
+		SOCKET accept(SOCKET s, struct sockaddr* addr, int* addrlen)
+		
+		-s: descriptor that identifies a socket that has been placed in a listening
+		state with the listen() function
+
+		-addr: optional structure containing the client address information
+		-addrlen: optional size of the address structure
+
+		-if no errors, accept() returns a value of type SOCKET that is a descriptor
+		for the new socket that is connected to the client. The original socket can be 
+		used to listen for more incoming calls.
+	*/
+
+	SOCKET acceptedSocket;	// the new socket that accept() will return
+	acceptedSocket = accept(serverSocket, NULL, NULL);
+
+	if (acceptedSocket == INVALID_SOCKET) {
+		cout << "accept failed: " << WSAGetLastError() << endl;
+		WSACleanup();
+		return -1;
+	}
+	else {
+		cout << "Connected.." << endl;
+	}
+
+	return acceptedSocket;
+}
+
+int sendData(SOCKET clientSocket) {
+
+	/*
+		send() function:
+
+		- sends data on a connected socket
+
+		int send(SOCKET s, const char *buf, int len, int flags)
+
+		-s: the descriptor that identifies a connected socket.
+		-buf: A pointer to the buffer to the data to be transmitted.
+		-len: The length in bytes of the buffer pointed to by the buf paremeter
+		-flags: optional set of flags that influences the behavior of this function
+
+		-if no errors occur, send() returns the number of bytes sent. Otherwise
+		SOCKET_ERROR is returned.
+	
+	*/
+
+	char buffer[200];
+
+	printf("Enter your message: ");
+	cin.getline(buffer, 200);
+
+	// clientSocket is the accepted socket
+	int message = send(clientSocket, buffer, 200, 0);
+	
+	if (message == SOCKET_ERROR) {
+		cout << "Server send error" << WSAGetLastError() << endl;
+		return -1;
+	}
+	else {
+		cout << "Server sent: " << message << endl;
+	}
 }

@@ -1,4 +1,5 @@
-﻿  ServerFunctions.cpp
-  Main.cpp
+﻿  Main.cpp
+  ServerFunctions.cpp
   Generating Code...
+C:\Users\Brandon Lingo\Desktop\Sockets\ServerFunctions.cpp(199): warning C4715: 'sendData': not all control paths return a value
   Sockets.vcxproj -> C:\Users\Brandon Lingo\Desktop\Sockets\Debug\Sockets.exe
