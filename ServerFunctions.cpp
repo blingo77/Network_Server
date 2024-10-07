@@ -4,6 +4,18 @@
 #include "Headers/ServerFunctions.h"
 #include <tchar.h>
 
+/*
+	Server Function Steps:
+
+	1. Initialize WSA - WSAStartup()
+	2. Create a socket - socket()
+	3. Bind the socket - bind()
+	4. Listen on the socket - listen()
+	5. Accept a connection - accept(), connect()
+	6. Receive and send data - recv(), send(), recvfrom(), sendto()
+	7. Disconnect - closesocket()
+*/
+
 using namespace std;
 
 /*
@@ -162,38 +174,33 @@ SOCKET acceptSocket(SOCKET serverSocket) {
 	return acceptedSocket;
 }
 
-int sendData(SOCKET clientSocket) {
+int receiveData(SOCKET acceptedSocket) {
 
 	/*
-		send() function:
+		recv(function):
 
-		- sends data on a connected socket
+		- this function recieves data from a connected socket.
 
-		int send(SOCKET s, const char *buf, int len, int flags)
+		int recv(SOCKET s, char* buf, int len, int flags)
 
-		-s: the descriptor that identifies a connected socket.
-		-buf: A pointer to the buffer to the data to be transmitted.
-		-len: The length in bytes of the buffer pointed to by the buf paremeter
+		-s: The descriptor that identifies a connected socket.
+		-buf: A pointer to the buffer to recieve incoming data.
+		-len: The length in bytes of the buffer pointed to by the buf parameter.
 		-flags: optional set of flags that influences the behavior of this function
 
-		-if no errors occur, send() returns the number of bytes sent. Otherwise
-		SOCKET_ERROR is returned.
-	
+		- if no errors, then recv returns the number of bytes received. If the
+		connection has been closed gracefully, the return value is zero. Otherwise
+		SOCKET_ERROR is returned
 	*/
 
-	char buffer[200];
+	char receiveBuffer[200] = "";
+	int byteCount = recv(acceptedSocket, receiveBuffer, 200, 0);
 
-	printf("Enter your message: ");
-	cin.getline(buffer, 200);
-
-	// clientSocket is the accepted socket
-	int message = send(clientSocket, buffer, 200, 0);
-	
-	if (message == SOCKET_ERROR) {
-		cout << "Server send error" << WSAGetLastError() << endl;
-		return -1;
+	if (byteCount < 0) {
+		cout << "Client: error" << WSAGetLastError() << endl;
+		return 0;
 	}
 	else {
-		cout << "Server sent: " << message << endl;
+		cout << "Received data: " << receiveBuffer << endl;
 	}
 }

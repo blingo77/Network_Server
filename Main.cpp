@@ -9,14 +9,15 @@ int main() {
 
 	int port = 55555;
 	SOCKET socks;
-	SOCKET clientSocket;
+	SOCKET acceptedSocket;
 
 	load_WSA_dll();
 	socks = socket();
 	bindSocket(port,socks);
 	listen(socks);
-	clientSocket = acceptSocket(socks);
-	sendData(clientSocket);
+	acceptedSocket = acceptSocket(socks);
+	receiveData(acceptedSocket);
 
+	WSACleanup();
 	return 0;
 }
