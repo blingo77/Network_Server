@@ -3,6 +3,9 @@
 #include <WS2tcpip.h>
 #include "Headers/ServerFunctions.h"
 #include <tchar.h>
+#include <string>
+#include <vector>
+#include <mutex>
 
 /*
 	Server Function Steps:
@@ -17,6 +20,9 @@
 */
 
 using namespace std;
+
+mutex mtx;
+vector<SOCKET> allClientSockets;
 
 /*
 	WSADATA struct:
@@ -169,9 +175,24 @@ SOCKET acceptSocket(SOCKET serverSocket) {
 	}
 	else {
 		cout << "Connected.." << endl;
+
+		lock_guard<mutex> lock(mtx);
+		allClientSockets.push_back(acceptedSocket);
 	}
 
 	return acceptedSocket;
+}
+
+void boradCastMessage(string message, SOCKET senderSocket) {
+
+	lock_guard<mutex> lock(mtx);
+
+	for (SOCKET client : allClientSockets) {
+
+		send(client, message.c_str(), message.size(), 0);
+
+		
+	}
 }
 
 int receiveData(SOCKET acceptedSocket) {
@@ -194,13 +215,22 @@ int receiveData(SOCKET acceptedSocket) {
 	*/
 
 	char receiveBuffer[200] = "";
-	int byteCount = recv(acceptedSocket, receiveBuffer, 200, 0);
+	
+	while (true) {
 
-	if (byteCount < 0) {
-		cout << "Client: error" << WSAGetLastError() << endl;
-		return 0;
-	}
-	else {
-		cout << "Received data: " << receiveBuffer << endl;
+		int byteCount = recv(acceptedSocket, receiveBuffer, 200, 0);
+
+		string message = "Client " + to_string(acceptedSocket) + ":" + receiveBuffer + "\n";
+		cout << message << endl;
+
+		if (byteCount < 0) {
+			cout << "Client: error" << WSAGetLastError() << endl;
+			return 0;
+		}
+		else {
+			cout << "Received data: " << receiveBuffer << endl;
+		}
+
+		boradCastMessage(message, acceptedSocket);
 	}
 }

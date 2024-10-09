@@ -3,6 +3,8 @@
 #include <WinSock2.h>
 #include "Headers/ServerFunctions.h"
 #include <thread>
+#include <vector>
+#include <mutex>
 
 /*
 	Server Function Steps:
@@ -23,6 +25,9 @@ int main() {
 	int port = 55555;
 	SOCKET socks;
 	SOCKET acceptedSocket;
+	vector<SOCKET> allClientSockets;
+	mutex clientsMutex;
+
 
 	load_WSA_dll();
 	socks = socket();
